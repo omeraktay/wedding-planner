@@ -2,7 +2,7 @@ import Guest from "../models/Guest.js";
 
 export const getGuests = async (req, res) => {
     try {
-        const guests = await Guest.find({createdBy: req.user.sub});
+        const guests = await Guest.find({createdBy: req.auth.sub});
         res.json(guests);
     } 
     catch (error) {
@@ -14,7 +14,7 @@ export const addGuest = async (req, res) => {
     const { name, email, rsvp } = req.body;
     try {
         const newGuest = new Guest({
-            name, email, rsvp, createdBy: req.user.sub
+            name, email, rsvp, createdBy: req.auth.sub
         })
         await newGuest.save();
         res.status(201).json(newGuest);
@@ -28,7 +28,7 @@ export const deleteGuest = async (req, res) => {
     try {
         const guest = await Guest.findOneAndDelete({
             _id: req.params.id,
-            createdBy: req.user.sub
+            createdBy: req.auth.sub
         });
         if(!guest) return res.status(404).json({message: 'Guest not found!'});
         res.jason({message: 'Deleted'});

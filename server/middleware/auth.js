@@ -1,11 +1,12 @@
-import jwt from 'express-jwt';
+import {expressjwt} from 'express-jwt';
 import jwks from 'jwks-rsa';
 import dotenv from 'dotenv';
+// import { expressJwtSecret } from 'jwks-rsa';
 
 dotenv.config();
 
-export const checkJwt = jwt({
-    secret: jwks.expressJwtScret({
+export const checkJwt = expressjwt({
+    secret: jwks.expressJwtSecret({
         cahce: true,
         rateLimit: true,
         jwksRequesPerMinute: 5,
