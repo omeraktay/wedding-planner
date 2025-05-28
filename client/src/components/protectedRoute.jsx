@@ -6,7 +6,7 @@ function ProtectedRoute({ children }){
     const { isAuthenticated, isLoading } = useAuth0();
 
     if(isLoading){
-        return <p>Loading...</p>
+        return <p>Please log in to view your guests.</p>
     }
 
     if(!isAuthenticated){

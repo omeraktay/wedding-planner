@@ -1,19 +1,22 @@
-// client/src/pages/GuestList.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
 
+function capitalize(str) {
+  return str.replace(/\b\w/g, char => char.toUpperCase());
+}
+
 function GuestList() {
-  const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [guests, setGuests] = useState([]);
   const [formData, setFormData] = useState({ name: '', email: '', rsvp: 'Maybe' });
-  const [newGuest, setNewGuest] = useState('');
+  const [editId, setEditId] = useState(null);
 
-  // Fetch guests
   const fetchGuests = async () => {
+    if (isLoading || !isAuthenticated) return;
     try {
       const token = await getAccessTokenSilently();
-      const res = await axios.get('http://localhost:5000/api/guests', {
+      const res = await axios.get('http://localhost:3000/api/guests', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGuests(res.data);
@@ -24,29 +27,35 @@ function GuestList() {
 
   useEffect(() => {
     if (isAuthenticated) fetchGuests();
-  }, [isAuthenticated]);
+  }, [getAccessTokenSilently, isAuthenticated, isLoading]);
 
-  // Add guest
-  const handleAdd = async (e) => {
+  const handleAddOrUpdate = async (e) => {
     e.preventDefault();
+    const token = await getAccessTokenSilently();
+
     try {
-      const token = await getAccessTokenSilently();
-      const res = await axios.post('http://localhost:5000/api/guests', formData, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
-      setGuests(prev => [...prev, res.data]);
+      if (editId) {
+        const res = await axios.put(`http://localhost:3000/api/guests/${editId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setGuests(prev => prev.map(g => (g._id === editId ? res.data : g)));
+        setEditId(null);
+      } else {
+        const res = await axios.post('http://localhost:3000/api/guests', formData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setGuests(prev => [...prev, res.data]);
+      }
       setFormData({ name: '', email: '', rsvp: 'Maybe' });
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Delete guest
   const handleDelete = async (id) => {
     try {
       const token = await getAccessTokenSilently();
-      await axios.delete(`http://localhost:5000/api/guests/${id}`, {
+      await axios.delete(`http://localhost:3000/api/guests/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGuests(prev => prev.filter(g => g._id !== id));
@@ -55,13 +64,18 @@ function GuestList() {
     }
   };
 
+  const handleEdit = (guest) => {
+    setFormData({ name: guest.name, email: guest.email, rsvp: guest.rsvp });
+    setEditId(guest._id);
+  };
+
   if (!isAuthenticated) return <p>Please log in to view your guests.</p>;
 
   return (
     <div className="container mt-4">
       <h2>Guest List</h2>
 
-      <form className="mb-4" onSubmit={handleAdd}>
+      <form className="mb-4" onSubmit={handleAddOrUpdate}>
         <div className="row g-2 align-items-end">
           <div className="col-md-3">
             <input
@@ -92,7 +106,9 @@ function GuestList() {
             </select>
           </div>
           <div className="col-md-2">
-            <button className="btn btn-primary w-100" type="submit">Add Guest</button>
+            <button className="btn btn-primary w-100" type="submit">
+              {editId ? 'Update Guest' : 'Add Guest'}
+            </button>
           </div>
         </div>
       </form>
@@ -101,9 +117,12 @@ function GuestList() {
         {guests.map(guest => (
           <li key={guest._id} className="list-group-item d-flex justify-content-between align-items-center">
             <div>
-              <strong>{guest.name}</strong> ({guest.rsvp}) {guest.email && `- ${guest.email}`}
+              <strong>{capitalize(guest.name)}</strong> ({guest.rsvp}) {guest.email && `- ${guest.email}`}
             </div>
-            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(guest._id)}>Delete</button>
+            <div>
+              <button className="btn btn-secondary btn-sm me-2" onClick={() => handleEdit(guest)}>Edit</button>
+              <button className="btn btn-danger btn-sm" onClick={() => handleDelete(guest._id)}>Delete</button>
+            </div>
           </li>
         ))}
       </ul>
@@ -112,4 +131,3 @@ function GuestList() {
 }
 
 export default GuestList;
-

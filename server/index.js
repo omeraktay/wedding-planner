@@ -3,19 +3,25 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import guestRouter from './routes/guestRoutes.js';
+import { handleAuthErrors } from './middleware/auth.js';
 
 dotenv.config();
+
 const app = express();
+
+app.use(express.json());
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true,
 }));
-app.use(express.json());
 
-const PORT = process.env.PORT || 5000;
+app.get('/test', (req, res) => res.json({ message: 'This works!' }));
 
 app.get('/', (req, res) => res.send('API Running'));
 app.use('/api/guests', guestRouter);
+app.use(handleAuthErrors);
+
+const PORT = process.env.PORT || 3000;
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,

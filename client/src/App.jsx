@@ -11,7 +11,7 @@ function App() {
     <Navbar />
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/guests" element={<ProtectedRoute><GuestList /></ProtectedRoute>} />
+      <Route path="/guests" element={<GuestList />} />
       {/* other routes */}
     </Routes>
     </>
