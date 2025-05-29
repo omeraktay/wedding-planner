@@ -3,7 +3,7 @@ import Guest from "../models/Guest.js";
 export const getGuests = async (req, res) => {
     try {
         const guests = await Guest.find({createdBy: req.auth.sub});
-        console.log('GET /api/guests hit'); 
+        console.log('GET /api/guests works'); 
         res.json(guests);
     } 
     catch (error) {
