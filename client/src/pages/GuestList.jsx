@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
-
-function capitalize(str) {
-  return str.replace(/\b\w/g, char => char.toUpperCase());
-}
+import capitalize from '../components/Capitalize';
 
 function GuestList() {
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -137,7 +134,7 @@ function GuestList() {
       </div>
 
       {/* Guest List */}
-      <ul className="list-group">
+      <ul className="list-group mb-4">
         {guests
           .filter(guest => filterStatus === 'All' || guest.rsvp === filterStatus)
           .map(guest => (

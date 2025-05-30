@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
+import capitalize from './Capitalize';
 
 function Navbar() {
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
@@ -16,14 +17,16 @@ function Navbar() {
       <div>
         <Link to="/" style={{ marginRight: '1rem' }}>Home</Link>
         {isAuthenticated && (
-          <Link to="/guests">Guest List</Link>
+          <Link to="/guests" style={{ marginRight: '1rem' }}>Guest List</Link>
+        )}
+        {isAuthenticated && (
+          <Link to='/todo-list' style={{ marginRight: '1rem' }}>To-Do List</Link>
         )}
       </div>
-
       <div>
         {isAuthenticated ? (
           <>
-            <span style={{ marginRight: '1rem' }}>👤 {user.name}</span>
+            <span style={{ marginRight: '1rem' }}>👤 {capitalize(user.name)}</span>
             <button onClick={() => logout({ returnTo: window.location.origin })}>
               Logout
             </button>
