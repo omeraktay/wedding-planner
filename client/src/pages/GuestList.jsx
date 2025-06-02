@@ -6,7 +6,7 @@ import capitalize from '../components/Capitalize';
 function GuestList() {
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [guests, setGuests] = useState([]);
-  const [formData, setFormData] = useState({ name: '', email: '', rsvp: 'Pending' });
+  const [formData, setFormData] = useState({ name: '', email: '', rsvp: 'Pending', plusOnes: 0 });
   const [editGuest, setEditGuest] = useState(null);
   const [filterStatus, setFilterStatus] = useState('All')
 
@@ -76,14 +76,19 @@ function GuestList() {
     }
   };
 
+  const confirmed = guests.filter(g => g.rsvp === 'Confirmed');
+  const declined = guests.filter(g => g.rsvp === 'Declined');
+  const pending = guests.filter(g => g.rsvp === 'Pending');
+  const totalExpected = confirmed.reduce((sum, g) => sum + 1 + (g.plusOnes || 0), 0); 
+  
   if (!isAuthenticated) return <p>Please log in to view your guests.</p>;
-
+  
   return (
     <div className="container mt-4">
       <h2>Guest List</h2>
 
       {/* Add Form */}
-      <form className="mb-4" onSubmit={handleAdd}>
+      <form id='form' className="mb-4" onSubmit={handleAdd}>
         <div className="row g-2 align-items-end">
           <div className="col-md-3">
             <input
@@ -114,6 +119,17 @@ function GuestList() {
             </select>
           </div>
           <div className="col-md-2">
+            <input
+              type="number"
+              min="0"
+              className="form-control"
+              placeholder="+Guests"
+              value={formData.plusOnes === 0 ? "" : formData.plusOnes}
+              onChange={e => setFormData({ ...formData, plusOnes: parseInt(e.target.value) || 0 })}
+            />
+          </div>
+
+          <div className="col-md-2">
             <button className="btn btn-primary w-100" type="submit">Add Guest</button>
           </div>
         </div>
@@ -133,7 +149,11 @@ function GuestList() {
         </select>
       </div>
 
-      {/* Guest List */}
+      <p> Total confirmed guests: <strong>{ totalExpected }</strong> (+Guests are included), <br /> 
+      Pending guests: <strong>{pending.length}</strong>, <br /> 
+      Declined guests: <strong>{declined.length}</strong>  </p>
+
+        {/* Guest List */}
       <ul className="list-group mb-4">
         {guests
           .filter(guest => filterStatus === 'All' || guest.rsvp === filterStatus)
@@ -147,7 +167,7 @@ function GuestList() {
                 {guest.email && `${guest.email}`}
               </div>
               <div>
-                {guest.rsvp}
+                {guest.rsvp} {guest.rsvp === 'Confirmed' && guest.plusOnes > 0 && `(+${guest.plusOnes})`}
               </div>
             </div>
             <div>
@@ -179,6 +199,14 @@ function GuestList() {
                   placeholder="Email"
                   value={editGuest.email}
                   onChange={e => handleEditChange('email', e.target.value)}
+                />
+                <input
+                  type="number"
+                  min="0"
+                  className="form-control mb-2"
+                  placeholder="+Guests"
+                  value={editGuest.plusOnes === 0 ? "" : editGuest.plusOnes}
+                  onChange={e => handleEditChange('plusOnes', parseInt(e.target.value) || 0)}
                 />
                 <select
                   className="form-select"

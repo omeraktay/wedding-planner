@@ -12,10 +12,10 @@ export const getGuests = async (req, res) => {
 };
 
 export const addGuest = async (req, res) => {
-    const { name, email, rsvp } = req.body;
+    const { name, email, rsvp, plusOnes } = req.body;
     try {
         const newGuest = new Guest({
-            name, email, rsvp, createdBy: req.auth.sub
+            name, email, rsvp, plusOnes, createdBy: req.auth.sub
         })
         await newGuest.save();
         res.status(201).json(newGuest);
@@ -40,11 +40,11 @@ export const deleteGuest = async (req, res) => {
 
 export const updateGuest = async (req, res) => {
   try {
-    const { name, email, rsvp } = req.body;
+    const { name, email, rsvp, plusOnes } = req.body;
 
     const guest = await Guest.findOneAndUpdate(
       { _id: req.params.id, createdBy: req.auth.sub },
-      { name, email, rsvp },
+      { name, email, rsvp, plusOnes },
       { new: true }
     );
 

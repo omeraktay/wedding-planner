@@ -11,9 +11,9 @@ export default function TodoList() {
     return localStorage.getItem('defaultsLoaded') === 'true';
   });
   const [fadeOut, setFadeOut] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'completed', 'incomplete'
-  const [deadlineFilter, setDeadlineFilter] = useState(''); // ISO date string
-  const [sortOption, setSortOption] = useState('deadlineAsc'); // default sort
+  const [statusFilter, setStatusFilter] = useState('all'); 
+  const [deadlineFilter, setDeadlineFilter] = useState(''); 
+  const [sortOption, setSortOption] = useState('deadlineAsc'); 
   const filterPanelRef = useRef(null);
   
 
@@ -150,7 +150,7 @@ export default function TodoList() {
       <h2>Wedding To-Do List</h2>
 
       {/* Add Todo Form */}
-      <form className="mb-3" onSubmit={handleAdd}>
+      <form id='todoForm' className="mb-3" onSubmit={handleAdd}>
         <div className="row g-2 align-items-end">
           <div className="col-md-4">
             <input
@@ -185,7 +185,7 @@ export default function TodoList() {
                 type="button"
                 onClick={() => {
                   setFadeOut(true);
-                  setTimeout(handleLoadDefaults, 500); // wait for fade before calling
+                  setTimeout(handleLoadDefaults, 500); 
                 }}
                 data-bs-toggle="tooltip"
                 title="Click to load a must-have wedding checklist. You can also edit-delete or set a deadline."
