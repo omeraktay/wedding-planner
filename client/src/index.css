@@ -1,3 +1,39 @@
-body{
-    background-color: #fcfcfa;
+
+html, body {
+  overflow: visible !important;
+  background-color: #fcfcfa;
+}
+
+/* SeatingPlanner.jsx */
+@media only screen and (max-width: 600px) {
+  .table{
+    margin-bottom: 30px;
+  }
+}
+
+.fade-out {
+  animation: fadeOut 0.4s;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.hovered {
+  background-color: #bdefff !important;
+}
+
+.drag-overlay-guest {
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
+  pointer-events: none;
 }

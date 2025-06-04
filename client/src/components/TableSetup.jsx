@@ -72,7 +72,7 @@ function TableSetup() {
           <input
             type="number"
             min="1"
-            max="16"
+            max="12"
             className="form-control"
             value={seatsPerTable}
             onChange={(e) => setSeatsPerTable(e.target.value)}
