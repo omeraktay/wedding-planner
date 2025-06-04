@@ -22,6 +22,9 @@ function Navbar() {
         {isAuthenticated && (
           <Link to='/todo-list' style={{ marginRight: '1rem' }}>To-Do List</Link>
         )}
+        {isAuthenticated && (
+          <Link to="seating-setup" style={{ marginRight: '1rem' }}>Seating Planning</Link>
+        )}
       </div>
       <div>
         {isAuthenticated ? (

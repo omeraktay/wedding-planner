@@ -1,7 +1,6 @@
 import {expressjwt} from 'express-jwt';
 import jwks from 'jwks-rsa';
 import dotenv from 'dotenv';
-// import { expressJwtSecret } from 'jwks-rsa';
 
 dotenv.config();
 
