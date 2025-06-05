@@ -35,35 +35,40 @@ export default   function DroppableSeat({
         height: '70px',
         borderRadius: '50%',
         border: '1px dashed #aaa',
-        backgroundColor: isOver ? '#bdefff' :guest ? '#d4fce2' : '#f0f0f0',
+        backgroundColor: isOver ? '#4caf50' :guest ? '#d4fce2' : '#f0f0f0',
         fontSize: '0.75rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}
-      onDoubleClick={() => {
-    const guest = assignedSeats[tableId]?.[seatIndex];
-    if (guest) {
-      const seatKey = `${tableId}-${seatIndex}`;
-      setFadingSeats((prev) => ({ ...prev, [seatKey]: true }));
+onDoubleClick={() => {
+  if (!guest) return;
 
-      setTimeout(() => {
-        const newAssignedSeats = { ...assignedSeats };
-        newAssignedSeats[tableId][seatIndex] = null;
-        setAssignedSeats(newAssignedSeats);
+  const seatKey = `${tableId}-${seatIndex}`;
+  setFadingSeats((prev) => ({ ...prev, [seatKey]: true }));
 
-        setUnassignedGuests((prev) => {
-          const alreadyListed = prev.some((g) => g._id === guest._id);
-          return alreadyListed ? prev : [...prev, guest];
-        });
+  setTimeout(() => {
+    setAssignedSeats(prev => {
+      const updated = { ...prev };
+      updated[tableId][seatIndex] = null;
+      return updated;
+    });
 
-        setFadingSeats((prev) => {
-          const updated = { ...prev };
-          delete updated[seatKey];
-          return updated;
-        });
-      }, 400); // Fade-out duration
-    }}}
+    setUnassignedGuests(prev => {
+      // Avoid duplicates
+      return prev.some((g) => g._id === guest._id)
+        ? prev
+        : [...prev, guest];
+    });
+
+    setFadingSeats((prev) => {
+      const updated = { ...prev };
+      delete updated[seatKey];
+      return updated;
+    });
+  }, 400);
+}}
+
     >
       {guest ? <DraggableGuest guest={guest} /> : 'Empty'}
     </div>

@@ -3,11 +3,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
 import TableSetup from '../components/TableSetup';
-import { DndContext, closestCenter, useDroppable } from '@dnd-kit/core';
+import { DndContext, closestCenter, useDroppable, DragOverlay, useSensors, useSensor, PointerSensor, TouchSensor, KeyboardSensor, rectIntersection } from '@dnd-kit/core';
 import {
   SortableContext,
   useSortable,
   rectSortingStrategy,
+  sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import DroppableSeat from '../components/DroppableSeat';
 import DraggableGuest from '../components/DraggableGuest';
@@ -19,6 +20,7 @@ export default function SeatingPlanner() {
   const [guests, setGuests] = useState([]);
   const [assignedSeats, setAssignedSeats] = useState({});  
   const [unassignedGuests, setUnassignedGuests] = useState([]);
+  const [activeGuest, setActiveGuest] = useState(null);
 
 
   useEffect(() => {
@@ -121,6 +123,9 @@ function handleDragEnd(event) {
     );
   }
 
+  // Do not assign if the seat is laready occupied
+  if (updatedSeats[tableId][seatIndex]) return;
+
   // Assign to new seat if available
   if (!updatedSeats[tableId][seatIndex]) {
     updatedSeats[tableId][seatIndex] = guest;
@@ -128,32 +133,68 @@ function handleDragEnd(event) {
 
   setAssignedSeats(updatedSeats);
   setUnassignedGuests(prev => prev.filter(g => g._id !== guestId));
+  setActiveGuest(null);
 }
 
 
 
 function DroppableUnassignedArea({ children }) {
-  const { setNodeRef } = useDroppable({ id: 'unassigned' });
+  const { setNodeRef, isOver } = useDroppable({ id: 'unassigned' });
 
   return (
-    <div ref={setNodeRef} style={{ width: '200px'}}>
-      <h5>Guests</h5>
-      <div style={{display: 'flex',flexWrap: 'wrap'}}>
+    <div
+      ref={setNodeRef}
+      style={{
+        width: '200px',
+        minHeight: '500px', // Makes it a large drop target
+        padding: '12px',
+        border: isOver ? '2px dashed #4caf50' : '2px dashed #ccc',
+        borderRadius: '8px',
+        background: isOver ? '#f0fff0' : '#fafafa',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+      }}
+    >
+      <h5 style={{ marginBottom: '10px' }}>Guests</h5>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
         {children}
       </div>
     </div>
   );
 }
 
+
+function handleDragStart(event) {
+  const { active } = event;
+  const guest = guests.find(g => g._id === active.id);
+  if (guest) {
+    setActiveGuest(guest);
+  }
+}
+
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const sensors = useSensors(
+  useSensor(PointerSensor, {
+    activationConstraint: isTouchDevice ?
+    { delay: 250, tolerance: 10 } :
+    { delay: 75, tolerance: 5 }
+  }),
+  useSensor(TouchSensor),
+  useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  })
+)
+
   if (!seatingChart) return <p>Loading seating chart...</p>;
 
   return (
-  <div className="container-fluid mt-4"  style={{  overflow: "visible" }}>
+  <div className="container-fluid mt-4"  style={{  overflow: "visible", touchAction: "none" }}>
     <TableSetup />
     <h2 className="mb-4">Seating Chart Planner</h2>
     <div className="d-flex gap-5" style={{ alignItems: 'flex-start', overflow: "visible"}}>
       {/* Unassigned Guests */}
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} collisionDetection={ closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div style={{  overflow: "visible" }}>
         <DroppableUnassignedArea>
           <SortableContext items={unassignedGuests.map(g => g._id)} strategy={rectSortingStrategy}>
@@ -161,6 +202,28 @@ function DroppableUnassignedArea({ children }) {
               <DraggableGuest key={guest._id} guest={guest} />
             ))}
           </SortableContext>
+          <DragOverlay>
+            {activeGuest ? (
+              <div
+                style={{
+                     padding: '24px',
+                     border: '1px solid #ccc',
+                     borderRadius: '50%',
+                     background: '#f9f9f9',
+                     margin: '4px 0',
+                     cursor: 'grab',
+                     fontSize: '12px',
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     maxWidth: "70px",
+                     height: '70px'
+                }}
+              >
+                {activeGuest.name}
+              </div>
+            ) : null}
+          </DragOverlay>
         </DroppableUnassignedArea>
       </div>
 

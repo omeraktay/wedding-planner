@@ -25,15 +25,6 @@ html, body {
 }
 
 .hovered {
-  background-color: #bdefff !important;
+  background-color: #f0fff0 !important;
 }
 
-.drag-overlay-guest {
-  padding: 8px 12px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  font-weight: 500;
-  pointer-events: none;
-}
