@@ -3,22 +3,39 @@ import SeatingChart from "../models/SeatingChart.js";
 export const saveUpdateSeating = async (req, res) => {
     const { tableCount, seatsPerTable } = req.body;
     const userId = req.auth.sub;
+
     try {
-        let chart = await SeatingChart.findOne({userId})
-        if(chart){
+        let chart = await SeatingChart.findOne({ userId });
+        let removedGuests = [];
+
+        if (chart) {
+            // Identify removed tables
+            const oldTableCount = chart.tableCount;
+
+            if (oldTableCount > tableCount && chart.assignments) {
+                for (const [guestId, seatInfo] of chart.assignments.entries()) {
+                    if (seatInfo.table > tableCount) {
+                        removedGuests.push(guestId);  // Collect guest to unassign
+                        chart.assignments.delete(guestId);  // Remove invalid assignment
+                    }
+                }
+            }
+
+            // Update table/seats
             chart.tableCount = tableCount;
             chart.seatsPerTable = seatsPerTable;
             await chart.save();
+        } else {
+            chart = await SeatingChart.create({ userId, tableCount, seatsPerTable });
         }
-        else{
-            chart = await SeatingChart.create({userId, tableCount, seatsPerTable});
-        }
-        res.status(200).json(chart);
+
+        res.status(200).json({ chart, removedGuests });
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: 'Failed to save seating chart!'});
+        res.status(500).json({ message: 'Failed to save seating chart!' });
     }
-}
+};
+
 
 export const getSeating = async (req, res) => {
     const userId = req.auth.sub;
@@ -30,25 +47,6 @@ export const getSeating = async (req, res) => {
         res.status(500).json({message: "Failed to fetch seating chart!"});
     }
 } 
-
-// export const assignGuest = async (req, res) => {
-//     const userId = req.auth.sub;
-//     const { guestId, table, seat } = req.body;
-
-//     try {
-//         const chart = await SeatingChart.findOne({userId});
-//         if(!chart){
-//             return res.status(404).json({message: "Seating chart not found!"});
-//         }
-//         chart.assignment = chart.assignment.filter(a => a.guestId.toString() !== guestId); // To remove existing assignment for the guest
-//         chart.assignment.push({ guestId, table, seat }); // To add new assignment
-//         await chart.save();
-//         res.status(200).json(chart);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({message: "Failed to assign guest to table!"});
-//     }
-// }
 
 export const saveAssignments  = async (req, res) => {
     const userId = req.auth.sub;

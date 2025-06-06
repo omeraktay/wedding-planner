@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
-import TableSetup from '../components/TableSetup';
+import TableSetup from '../components/SeatPlanning/TableSetup';
 import { DndContext, closestCenter, useDroppable, DragOverlay, useSensors, useSensor, PointerSensor, TouchSensor, KeyboardSensor, rectIntersection } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -10,9 +10,8 @@ import {
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import DroppableSeat from '../components/DroppableSeat';
-import DraggableGuest from '../components/DraggableGuest';
-
+import DroppableSeat from '../components/SeatPlanning/DroppableSeat';
+import DraggableGuest from '../components/SeatPlanning/DraggableGuest';
 
 export default function SeatingPlanner() {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -35,7 +34,7 @@ export default function SeatingPlanner() {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-
+        const chartData = chartRes.data.chart || chartRes.data; 
         const filteredGuests = [];
 
     guestRes.data.forEach(guest => {
@@ -54,7 +53,7 @@ export default function SeatingPlanner() {
         filteredGuests.push(guest);
       }
     });
-        setSeatingChart(chartRes.data);
+        setSeatingChart(chartData);
         setGuests(filteredGuests);
         setUnassignedGuests(filteredGuests);
 
@@ -64,13 +63,36 @@ export default function SeatingPlanner() {
         initialAssignments[`table-${i + 1}`] = Array(chartRes.data.seatsPerTable).fill(null);
         }
         setAssignedSeats(initialAssignments);
+        // Fetch saved seat assignments (after initial seat structure)
+        const assignmentsRes = await axios.get('http://localhost:3000/api/seating-chart/assignments', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const savedAssignments = assignmentsRes.data; // should be a map like { guestId: { table: 1, seat: 3 }, ... }
+
+        // Reapply saved assignments into assignedSeats
+        const updatedSeats = JSON.parse(JSON.stringify(initialAssignments));
+        filteredGuests.forEach(guest => {
+          const assignment = savedAssignments[guest._id];
+          if (assignment) {
+            const tableKey = `table-${assignment.table}`;
+            if (updatedSeats[tableKey] && !updatedSeats[tableKey][assignment.seat]) {
+              updatedSeats[tableKey][assignment.seat] = guest;
+            }
+          }
+        });
+        setAssignedSeats(updatedSeats);
+
+        // Remove assigned guests from unassigned
+        const assignedIds = Object.keys(savedAssignments);
+        setUnassignedGuests(filteredGuests.filter(g => !assignedIds.includes(g._id)));
 
     };
 
     if (isAuthenticated) fetchData();
   }, [isAuthenticated, getAccessTokenSilently]);
 
-function handleDragEnd(event) {
+async function handleDragEnd(event) {
   const { active, over } = event;
   if (!over || !active) return;
 
@@ -132,6 +154,29 @@ function handleDragEnd(event) {
   }
 
   setAssignedSeats(updatedSeats);
+  const token = await getAccessTokenSilently();
+  const newAssignments = {};
+
+  // Flatten current state to guestId -> { table, seat }
+  Object.entries(updatedSeats).forEach(([tableId, seatArray]) => {
+    const tableNum = parseInt(tableId.split('-')[1]);
+    seatArray.forEach((guest, seatIndex) => {
+      if (guest) {
+        newAssignments[guest._id] = {
+          table: tableNum,
+          seat: seatIndex
+        };
+      }
+    });
+  });
+
+  // Save to backend
+  await axios.post(
+    'http://localhost:3000/api/seating-chart/assignments',
+    { assignments: newAssignments },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
   setUnassignedGuests(prev => prev.filter(g => g._id !== guestId));
   setActiveGuest(null);
 }
@@ -250,7 +295,7 @@ const sensors = useSensors(
                 margin: "15px"
             }}
             >
-                <h6 style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translateX(-50%)', zIndex: "1" }}>
+                <h6 style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translateX(-50%)', zIndex: "1"}}>
                 Table {tableIndex + 1}
                 </h6>
                 <div

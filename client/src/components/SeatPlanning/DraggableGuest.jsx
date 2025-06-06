@@ -1,5 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from '@dnd-kit/utilities';
+import capitalize from "../Capitalize";
 
 
 export default function DraggableGuest({ guest }) {
@@ -28,7 +29,7 @@ export default function DraggableGuest({ guest }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {guest.name}
+      {capitalize(guest.name)}
     </div>
   );
 }

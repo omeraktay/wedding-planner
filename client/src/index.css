@@ -2,6 +2,7 @@
 html, body {
   overflow: visible !important;
   background-color: #fcfcfa;
+  padding-bottom: 20px;
 }
 
 /* SeatingPlanner.jsx */

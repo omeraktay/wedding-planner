@@ -55,8 +55,8 @@ function TableSetup() {
   return (
     <div className="container mt-4">
       <h2>Seating Chart Setup</h2>
-      <form onSubmit={handleSubmit} className="row g-3">
-        <div className="col-md-6">
+      <form onSubmit={handleSubmit} className="row g-3" style={{marginBottom: '20px'}}>
+        <div className="col-md-5">
           <label className="form-label">Number of Tables</label>
           <input
             type="number"
@@ -67,7 +67,7 @@ function TableSetup() {
             required
           />
         </div>
-        <div className="col-md-6">
+        <div className="col-md-5">
           <label className="form-label">Seats per Table</label>
           <input
             type="number"
@@ -79,8 +79,8 @@ function TableSetup() {
             required
           />
         </div>
-        <div className="col-12">
-          <button className="btn btn-primary" type="submit">
+        <div className="col-md-2">
+          <button className="btn btn-primary" style={{marginTop: "31px"}}  type="submit">
             Save
           </button>
         </div>
