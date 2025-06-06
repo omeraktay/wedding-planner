@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { Auth0Provider } from '@auth0/auth0-react';
 import { BrowserRouter } from 'react-router-dom';
+import { BudgetProvider } from './components/BudgetContext'
 // import env from 'react-dotenv';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -18,7 +19,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       }}
     >
     <BrowserRouter>
-      <App />
+      <BudgetProvider>
+        <App />
+      </BudgetProvider>
     </BrowserRouter>
     </Auth0Provider>
   </React.StrictMode>

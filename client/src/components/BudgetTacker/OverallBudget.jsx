@@ -3,11 +3,12 @@ import { useState } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
+import { useBudget } from "../BudgetContext";
 
-export default function OverallBudget(){
+export default function OverallBudget({}){
     const { getAccessTokenSilently } = useAuth0();
     const [overallBudget, setOverallBudget] = useState(0);
-    const [savedOverallBudget, setSavedOverallBudget] = useState(0)
+    const {savedOverallBudget, setSavedOverallBudget} = useBudget()
 
     const fetchOverallBudget = async () => {
         try {
@@ -36,7 +37,7 @@ const handleSaveOverallBudget = async () => {
         setOverallBudget(res.data.overallBudget || 0);
         setSavedOverallBudget(res.data.overallBudget);
     } catch (error) {
-        
+        console.error('Failed to save! ', error);
     }
 }
     useEffect(() => {
@@ -64,7 +65,7 @@ const handleSaveOverallBudget = async () => {
                     <button className="btn btn-outline-primary" onClick={handleSaveOverallBudget}>Save</button>
                 </div>
             </div>
-            <div>
+            <div className="mb-5">
                 <h6>Your total budget: ${savedOverallBudget}</h6>
             </div>
         </div>

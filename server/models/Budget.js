@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 
 const budgetSchema = new mongoose.Schema({
     userId: {type: String, required: true},
-    overAllBudget: {type: Number},
     name: {type: String, required: true},
     category: {type: String},
     estimatedCost: {type: Number, required: true},

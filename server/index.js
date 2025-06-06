@@ -6,6 +6,7 @@ import guestRouter from './routes/guestRoutes.js';
 import todoRouter from './routes/todoRoutes.js';
 import seatingRouter from './routes/seatingRoutes.js';
 import budgetRouter from './routes/budgetRoutes.js';
+import overallBudgetRouter from './routes/overallBudgetRoutes.js';
 import { handleAuthErrors } from './middleware/auth.js';
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/api/guests', guestRouter);
 app.use('/api/todos', todoRouter);
 app.use('/api/seating-chart', seatingRouter);
 app.use('/api/budget', budgetRouter);
+app.use('/api/overall-budget', overallBudgetRouter);
 app.use(handleAuthErrors);
 
 const PORT = process.env.PORT || 3000;
