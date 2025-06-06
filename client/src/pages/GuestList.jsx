@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
 import capitalize from '../components/Capitalize';
+import ErrorHandler from '../components/ErrorHandler';
 
 function GuestList() {
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [guests, setGuests] = useState([]);
   const [formData, setFormData] = useState({ name: '', email: '', rsvp: 'Pending', plusOnes: 0 });
   const [editGuest, setEditGuest] = useState(null);
-  const [filterStatus, setFilterStatus] = useState('All')
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [error, setError] = useState(null);
 
   const fetchGuests = async () => {
     if (isLoading || !isAuthenticated) return;
@@ -18,8 +20,8 @@ function GuestList() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGuests(res.data);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -36,8 +38,8 @@ function GuestList() {
       });
       setGuests(prev => [...prev, res.data]);
       setFormData({ name: '', email: '', rsvp: 'Pending' });
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -48,8 +50,8 @@ function GuestList() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGuests(prev => prev.filter(g => g._id !== id));
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -71,8 +73,8 @@ function GuestList() {
       });
       setGuests(prev => prev.map(g => (g._id === editGuest._id ? res.data : g)));
       setEditGuest(null);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -86,6 +88,7 @@ function GuestList() {
   return (
     <div className="container mt-4">
       <h2>Guest List</h2>
+      <ErrorHandler error={error} clearError={() => setError(null)} />
 
       {/* Add Form */}
       <form id='form' className="mb-4" onSubmit={handleAdd}>
@@ -191,7 +194,7 @@ function GuestList() {
                 <input
                   className="form-control mb-2"
                   placeholder="Guest name"
-                  value={editGuest.name}
+                  value={capitalize(editGuest.name)}
                   onChange={e => handleEditChange('name', e.target.value)}
                 />
                 <input

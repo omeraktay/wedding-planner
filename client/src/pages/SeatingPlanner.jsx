@@ -1,12 +1,10 @@
-// src/pages/SeatingPlanner.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
 import TableSetup from '../components/SeatPlanning/TableSetup';
-import { DndContext, closestCenter, useDroppable, DragOverlay, useSensors, useSensor, PointerSensor, TouchSensor, KeyboardSensor, rectIntersection } from '@dnd-kit/core';
+import { DndContext, closestCenter, useDroppable, DragOverlay, useSensors, useSensor, PointerSensor, TouchSensor, KeyboardSensor } from '@dnd-kit/core';
 import {
   SortableContext,
-  useSortable,
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
@@ -57,20 +55,17 @@ export default function SeatingPlanner() {
         setGuests(filteredGuests);
         setUnassignedGuests(filteredGuests);
 
-        // Create initial seat structure
         const initialAssignments = {};
         for (let i = 0; i < chartRes.data.tableCount; i++) {
         initialAssignments[`table-${i + 1}`] = Array(chartRes.data.seatsPerTable).fill(null);
         }
         setAssignedSeats(initialAssignments);
-        // Fetch saved seat assignments (after initial seat structure)
         const assignmentsRes = await axios.get('http://localhost:3000/api/seating-chart/assignments', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const savedAssignments = assignmentsRes.data; // should be a map like { guestId: { table: 1, seat: 3 }, ... }
+        const savedAssignments = assignmentsRes.data; 
 
-        // Reapply saved assignments into assignedSeats
         const updatedSeats = JSON.parse(JSON.stringify(initialAssignments));
         filteredGuests.forEach(guest => {
           const assignment = savedAssignments[guest._id];
@@ -83,7 +78,6 @@ export default function SeatingPlanner() {
         });
         setAssignedSeats(updatedSeats);
 
-        // Remove assigned guests from unassigned
         const assignedIds = Object.keys(savedAssignments);
         setUnassignedGuests(filteredGuests.filter(g => !assignedIds.includes(g._id)));
 
@@ -100,7 +94,6 @@ async function handleDragEnd(event) {
   const dropTarget = over.id;
 
   if (dropTarget === 'unassigned') {
-    // Same as before...
     const newAssignedSeats = { ...assignedSeats };
     let removed = false;
 
@@ -138,17 +131,14 @@ async function handleDragEnd(event) {
 
   const updatedSeats = { ...assignedSeats };
 
-  // Remove guest from previous seat (if any)
   for (const tId in updatedSeats) {
     updatedSeats[tId] = updatedSeats[tId].map(seatGuest =>
       seatGuest && seatGuest._id === guestId ? null : seatGuest
     );
   }
 
-  // Do not assign if the seat is laready occupied
   if (updatedSeats[tableId][seatIndex]) return;
 
-  // Assign to new seat if available
   if (!updatedSeats[tableId][seatIndex]) {
     updatedSeats[tableId][seatIndex] = guest;
   }
@@ -157,7 +147,6 @@ async function handleDragEnd(event) {
   const token = await getAccessTokenSilently();
   const newAssignments = {};
 
-  // Flatten current state to guestId -> { table, seat }
   Object.entries(updatedSeats).forEach(([tableId, seatArray]) => {
     const tableNum = parseInt(tableId.split('-')[1]);
     seatArray.forEach((guest, seatIndex) => {
@@ -170,7 +159,6 @@ async function handleDragEnd(event) {
     });
   });
 
-  // Save to backend
   await axios.post(
     'http://localhost:3000/api/seating-chart/assignments',
     { assignments: newAssignments },
@@ -191,7 +179,7 @@ function DroppableUnassignedArea({ children }) {
       ref={setNodeRef}
       style={{
         width: '200px',
-        minHeight: '500px', // Makes it a large drop target
+        minHeight: '500px', 
         padding: '12px',
         border: isOver ? '2px dashed #4caf50' : '2px dashed #ccc',
         borderRadius: '8px',

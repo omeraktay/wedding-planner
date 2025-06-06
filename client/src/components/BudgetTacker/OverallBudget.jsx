@@ -4,11 +4,13 @@ import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { useBudget } from "../BudgetContext";
+import ErrorHandler from "../ErrorHandler";
 
 export default function OverallBudget({}){
     const { getAccessTokenSilently } = useAuth0();
     const [overallBudget, setOverallBudget] = useState(0);
-    const {savedOverallBudget, setSavedOverallBudget} = useBudget()
+    const {savedOverallBudget, setSavedOverallBudget} = useBudget();
+    const [error, setError] = useState(null);
 
     const fetchOverallBudget = async () => {
         try {
@@ -47,6 +49,7 @@ const handleSaveOverallBudget = async () => {
 
     return(
         <div className="container mt-4">
+            <ErrorHandler error={error} clearError={() => setError(null)} />
             <div className="row">
                 <div className=" col-md-8">
                     <div className="input-group  mb-3">

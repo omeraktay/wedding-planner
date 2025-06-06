@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
+import ErrorHandler from '../components/ErrorHandler';
 
 export default function TodoList() {
   const { getAccessTokenSilently } = useAuth0();
@@ -15,10 +16,7 @@ export default function TodoList() {
   const [deadlineFilter, setDeadlineFilter] = useState(''); 
   const [sortOption, setSortOption] = useState('deadlineAsc'); 
   const filterPanelRef = useRef(null);
-  
-
-
-
+  const [error, setError] = useState(null)
 
   useEffect(() => {
   const fetchTodos = async () => {
@@ -28,8 +26,8 @@ export default function TodoList() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTodos(res.data);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
   
@@ -47,8 +45,8 @@ export default function TodoList() {
       );
       setTodos((prev) => [...prev, res.data]);
       setFormData({ title: '', deadline: '' });
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -61,16 +59,13 @@ export default function TodoList() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Refetch todos after loading
       fetchTodos();
       
-      // Set loaded state and persist it
       setDefaultsLoaded(true);
       localStorage.setItem('defaultsLoaded', 'true');
 
-      // Fade-out animation is handled separately
-    } catch (err) {
-      console.error('Error loading defaults:', err);
+    } catch (error) {
+      console.error('Error loading defaults:', error);
     }
   };
 
@@ -89,8 +84,8 @@ export default function TodoList() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTodos((prev) => prev.filter((t) => t._id !== id));
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -103,8 +98,8 @@ export default function TodoList() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setTodos((prev) => prev.map((t) => (t._id === id ? res.data : t)));
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -131,8 +126,8 @@ export default function TodoList() {
       setTodos((prev) =>
         prev.map((t) => (t._id === res.data._id ? res.data : t))
       );
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -140,13 +135,14 @@ export default function TodoList() {
     if (filterPanelRef.current) {
       const bsCollapse = bootstrap.Collapse.getInstance(filterPanelRef.current);
       if (bsCollapse) {
-        bsCollapse.hide(); // collapse if already initialized
+        bsCollapse.hide(); 
       }
     }
   }, [statusFilter, deadlineFilter, sortOption]);
 
   return (
     <div className="container mt-4">
+      <ErrorHandler error={error} clearError={() => setError(null)} />
       <h2>Wedding To-Do List</h2>
 
       {/* Add Todo Form */}

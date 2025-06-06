@@ -1,15 +1,15 @@
-// src/components/TableSetup.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
+import ErrorHandler from '../ErrorHandler';
 
 function TableSetup() {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [tableCount, setTableCount] = useState('');
   const [seatsPerTable, setSeatsPerTable] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch existing config
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -22,8 +22,8 @@ function TableSetup() {
           setTableCount(res.data.tableCount);
           setSeatsPerTable(res.data.seatsPerTable);
         }
-      } catch (err) {
-        console.error('Failed to fetch seating chart:', err);
+      } catch (error) {
+        console.error('Failed to fetch seating chart:', error);
       } finally {
         setLoading(false);
       }
@@ -43,8 +43,8 @@ function TableSetup() {
       );
 
       alert('Seating configuration saved! Refresh the page to see the new seating chart.');
-    } catch (err) {
-      console.error('Failed to save seating chart:', err);
+    } catch (error) {
+      console.error('Failed to save seating chart:', error);
       alert('Error saving seating chart.');
     }
   };
@@ -54,6 +54,7 @@ function TableSetup() {
 
   return (
     <div className="container mt-4">
+      <ErrorHandler error={error} clearError={() => setError(null)} />
       <h2>Seating Chart Setup</h2>
       <form onSubmit={handleSubmit} className="row g-3" style={{marginBottom: '20px'}}>
         <div className="col-md-5">
