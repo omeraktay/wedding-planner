@@ -15,21 +15,21 @@ function Navbar() {
       borderBottom: '1px solid #ccc'
     }}>
       <div>
-        <Link to="/" style={{ marginRight: '1rem' }}>Home</Link>
+        <Link to="/" className='navElement' style={{ marginRight: '1rem' }}>Home</Link>
         {isAuthenticated && (
-          <Link to="/guests" style={{ marginRight: '1rem' }}>Guest List</Link>
+          <Link to="/guests" className='navElement' style={{ marginRight: '1rem' }}>Guest List</Link>
         )}
         {isAuthenticated && (
-          <Link to='/todo-list' style={{ marginRight: '1rem' }}>To-Do List</Link>
+          <Link to='/todo-list' className='navElement' style={{ marginRight: '1rem' }}>To-Do List</Link>
         )}
         {isAuthenticated && (
-          <Link to="seating-setup" style={{ marginRight: '1rem' }}>Seating Planning</Link>
+          <Link to="seating-setup" className='navElement' style={{ marginRight: '1rem' }}>Seating Planning</Link>
         )}
         {isAuthenticated && (
-          <Link to="budget-tracker" style={{ marginRight: '1rem' }}>Budget Tracker</Link>
+          <Link to="budget-tracker" className='navElement' style={{ marginRight: '1rem' }}>Budget Tracker</Link>
         )}
         {isAuthenticated && (
-          <Link to="deneme" style={{ marginRight: '1rem' }}>deneme</Link>
+          <Link to="deneme" className='navElement' style={{ marginRight: '1rem' }}>deneme</Link>
         )}
       </div>
       <div>

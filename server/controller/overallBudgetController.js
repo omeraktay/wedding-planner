@@ -1,12 +1,10 @@
 import OverallBudget from "../models/OverallBudget.js";
 
-
 export const setBudget = async (req, res) => {
   const userId = req.auth.sub;
   const { totalBudget } = req.body;
 
   try {
-    // Find or create a "master" entry to store the totalBudget
     let entry = await OverallBudget.findOne({ userId });
 
     if (!entry) {

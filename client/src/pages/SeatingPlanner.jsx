@@ -114,10 +114,32 @@ async function handleDragEnd(event) {
         const alreadyInList = prev.some(g => g._id === guestId);
         return alreadyInList ? prev : [...prev, movedGuest];
       });
+
+      //saves to backend if user unassigns a guest
+      const token = await getAccessTokenSilently();
+      const newAssignments = {};
+      Object.entries(newAssignedSeats).forEach(([tableId, seatArray]) => {
+        const tableNum = parseInt(tableId.split('-')[1]);
+        seatArray.forEach((guest, seatIndex) => {
+          if (guest) {
+            newAssignments[guest._id] = {
+              table: tableNum,
+              seat: seatIndex
+            };
+          }
+        });
+      });
+
+      await axios.post(
+        'http://localhost:3000/api/seating-chart/assignments',
+        { assignments: newAssignments },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
     }
 
     return;
   }
+
 
   const seatMatch = dropTarget.match(/^table-(\d+)-seat-(\d+)$/);
   if (!seatMatch) return;
@@ -137,8 +159,10 @@ async function handleDragEnd(event) {
     );
   }
 
+  // Do not assign if the seat is laready occupied
   if (updatedSeats[tableId][seatIndex]) return;
 
+  // Assign to new seat if available
   if (!updatedSeats[tableId][seatIndex]) {
     updatedSeats[tableId][seatIndex] = guest;
   }
@@ -147,6 +171,7 @@ async function handleDragEnd(event) {
   const token = await getAccessTokenSilently();
   const newAssignments = {};
 
+  // Flatten current state to guestId -> { table, seat }
   Object.entries(updatedSeats).forEach(([tableId, seatArray]) => {
     const tableNum = parseInt(tableId.split('-')[1]);
     seatArray.forEach((guest, seatIndex) => {
@@ -159,6 +184,7 @@ async function handleDragEnd(event) {
     });
   });
 
+  // Save to backend
   await axios.post(
     'http://localhost:3000/api/seating-chart/assignments',
     { assignments: newAssignments },

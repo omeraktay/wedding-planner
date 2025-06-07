@@ -1,8 +1,5 @@
 import Budget from "../models/Budget.js";
 
-
-
-
 export const getBudgetItems = async (req, res) => {
     const userId = req.auth.sub;
     try {

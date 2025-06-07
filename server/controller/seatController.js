@@ -9,19 +9,17 @@ export const saveUpdateSeating = async (req, res) => {
         let removedGuests = [];
 
         if (chart) {
-            // Identify removed tables
             const oldTableCount = chart.tableCount;
 
             if (oldTableCount > tableCount && chart.assignments) {
                 for (const [guestId, seatInfo] of chart.assignments.entries()) {
                     if (seatInfo.table > tableCount) {
-                        removedGuests.push(guestId);  // Collect guest to unassign
-                        chart.assignments.delete(guestId);  // Remove invalid assignment
+                        removedGuests.push(guestId);  
+                        chart.assignments.delete(guestId);  
                     }
                 }
             }
 
-            // Update table/seats
             chart.tableCount = tableCount;
             chart.seatsPerTable = seatsPerTable;
             await chart.save();

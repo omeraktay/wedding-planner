@@ -1,4 +1,3 @@
-// components/ErrorHandler.jsx
 import React from 'react';
 
 const ErrorHandler = ({ error, clearError }) => {

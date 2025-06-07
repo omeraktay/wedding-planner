@@ -29,3 +29,21 @@ html, body {
   background-color: #f0fff0 !important;
 }
 
+/* NavBar */
+
+.navElement{
+  font-style: italic;
+  text-decoration: none;
+  color: brown;
+  padding: 8px;
+  font-family: 'Carattere';
+  font-size: 20px;
+
+}
+
+
+/* Home Page */
+
+.homePageH1{
+    font-family: 'Carattere'
+}
